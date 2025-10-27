@@ -1,0 +1,36 @@
+Basic Claims Triangle gimmicks
+
+
+
+METHODOLOGY
+
+    Compile claims data in a development triangle
+    Calculate age-to-age factors
+    Calculate averages of the age-to-age factors
+    Select claim development factors
+    Select tail factor
+    Calculate cumulative claim development factors
+    Project ultimate claims
+
+
+Portfolio Generation:
+ - need to define a random claims function, monotonic decreasing
+ - need to generate random triangle of claims
+
+Calculate age-to-age factors
+
+
+Calculate averages of age-to-age factors
+
+
+Select claim development factors
+
+
+Select tail factor
+
+
+Calculate cumulative claim development factors
+
+
+Project Ultimate claims
+

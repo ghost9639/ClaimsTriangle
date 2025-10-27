@@ -1,0 +1,65 @@
+% Created 2025-10-23 Thu 20:57
+% Intended LaTeX compiler: pdflatex
+\documentclass[a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\usepackage{times}
+\usepackage{amsmath}
+\usepackage[utf8]{inputenc}
+\usepackage{natbib}
+\usepackage{graphicx}
+\author{Rahul Ghosh}
+\date{\today}
+\title{Mack Method Assumptions}
+\hypersetup{
+ pdfauthor={Rahul Ghosh},
+ pdftitle={Mack Method Assumptions},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={},
+ pdflang={English}}
+\begin{document}
+
+\maketitle
+\end{titlepage}
+
+\tableofcontents
+\flushleft
+
+Suppose, for a regular claims triangle, we have a system as such:
+
+\begin{center}
+\begin{tabular}{rrrrr}
+Year & 1 year claims & 2 year claims & 3 year claims & 4 year claims\\
+\hline
+2000 & 14124 & 10243 & 80425 & 62041\\
+2001 & 15083 & 12421 & 91240 & \\
+2002 & 13132 & 11023 &  & \\
+2003 & 15850 &  &  & \\
+\end{tabular}
+\end{center}
+
+We can generalise this as
+
+\begin{center}
+\begin{tabular}{rllll}
+Year & 1 year claims & 2 year claims & 3 year claims & 4 year claims\\
+\hline
+2000 & C\textsubscript{1,1} & C\textsubscript{1,2} & C\textsubscript{1,3} & C\textsubscript{1,4}\\
+2001 & C\textsubscript{2,1} & C\textsubscript{2,2} & C\textsubscript{2,3} & \\
+2002 & C\textsubscript{3,1}\} & C\textsubscript{3,2} &  & \\
+2003 & C\textsubscript{4,1} &  &  & \\
+\end{tabular}
+\end{center}
+
+\(C_{i,j}\) is used to model claims, with \(R_i\) being the outstanding claims in oncoming years. Then we can search for \(\sum^n_{i=1} R_i\) as the claims reserve.
+\end{document}

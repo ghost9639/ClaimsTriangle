@@ -1,0 +1,39 @@
+#+TITLE: Mack Method Assumptions
+#+AUTHOR: Rahul Ghosh
+#+OPTIONS: toc:nil prop:t
+#+LATEX_CLASS: article
+#+LATEX_CLASS_OPTIONS: [a4paper]
+#+LATEX_HEADER: \usepackage{times}
+#+LATEX_HEADER: \usepackage{amsmath}
+#+LATEX_HEADER: \usepackage[utf8]{inputenc}
+#+LATEX_HEADER: \usepackage{natbib}
+#+LATEX_HEADER: \usepackage{graphicx}
+
+
+\end{titlepage}
+
+\tableofcontents
+\flushleft
+
+Suppose, for a regular claims triangle, we have a system as such:
+
+|Year|1 year claims | 2 year claims | 3 year claims | 4 year claims |
+|----+--------------+---------------+---------------+---------------|
+|2000| 14124   | 10243 | 80425 | 62041 | 
+|2001| 15083  | 12421 | 91240 | |
+|2002| 13132 | 11023 | |  |
+|2003| 15850 | | | |
+
+We can generalise this as
+
+|Year|1 year claims | 2 year claims | 3 year claims | 4 year claims |
+|----+--------------+---------------+---------------+---------------|
+|2000| C_{1,1}  | C_{1,2} | C_{1,3} | C_{1,4} | 
+|2001| C_{2,1} | C_{2,2} | C_{2,3} | |
+|2002| C_{3,1}} | C_{3,2} | |  |
+|2003| C_{4,1} | | | |
+
+$C_{i,j}$ is used to model claims, with $R_i$ being the outstanding claims in oncoming years. Then we can search for $\sum^n_{i=1} R_i$ as the claims reserve.
+
+
+
