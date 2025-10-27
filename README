@@ -1,6 +1,4 @@
-Basic Claims Triangle gimmicks
-
-
+Basic and advanced claims triangle modelling.
 
 METHODOLOGY
 
@@ -11,26 +9,27 @@ METHODOLOGY
     Select tail factor
     Calculate cumulative claim development factors
     Project ultimate claims
+    Use Mack Model to predict total loss
 
 
-Portfolio Generation:
- - need to define a random claims function, monotonic decreasing
- - need to generate random triangle of claims
+Claims data is taken from the ChainLadder package on R.
 
-Calculate age-to-age factors
+First, for a manual model projecting losses:
 
+- I calculated age-to-age factors -> This was easily done by an R function that calculates culmulative factor differences moving up the claims triangle,
 
-Calculate averages of age-to-age factors
+- I made a log-linear extrapolation of the age-to-age factors -> linear regression on transformed factors over development years,
 
+- I used the extrapolation of factors to project claims for all years going forwards,
 
-Select claim development factors
-
-
-Select tail factor
+- I summed up (projected) future claims in order to get an estimate for future losses.
 
 
-Calculate cumulative claim development factors
 
+Then, for a Mack Model projecting losses using the ChainLadder package:
 
-Project Ultimate claims
+- I called the library, feeding it the correct data and specifications,
 
+- Checked whether key linear regression assumptions were met in the model,
+
+- Made minor adjustments to reduce key trend issues.
