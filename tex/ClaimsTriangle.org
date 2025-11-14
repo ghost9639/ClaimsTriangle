@@ -1,0 +1,229 @@
+#+TITLE: Life Insurance Reserves Calculator
+#+AUTHOR: R
+#+OPTIONS: toc:nil prop:t
+#+LATEX_CLASS: article
+#+LATEX_CLASS_OPTIONS: [a4paper]
+#+LATEX_HEADER: \usepackage{times}
+#+LATEX_HEADER: \usepackage{amsmath}
+#+LATEX_HEADER: \usepackage[utf8]{inputenc}
+#+LATEX_HEADER: \usepackage{natbib}
+#+LATEX_HEADER: \usepackage{graphicx}
+#+OPTIONS: listings:t
+#+LATEX_HEADER: \usepackage{listings}
+#+LATEX_HEADER: \lstset{basicstyle=\ttfamily\small}
+#+LATEX_HEADER: \usepackage{tabularx}
+#+LATEX_HEADER: \usepackage{makecell}
+
+\flushleft
+
+* Project Objectives
+
+We will regress on claims in claims ladders to make projections for future claims. First we will do this manually using R's inbuilt linear regression functionality, but we will then use the ChainLadder Mack Model package to very easily apply industry standard models to the problem. We will also critique the output and whether they line up with requirements.
+
+* Dataset
+
+The dataset used is taken from ChainLadder itself. ABC is a neatly formatted claims triangle for the worker's compensation portfolio of a large company. The data comes from 11 accident years and includes 11 development years, collected by [cite:@ABCsourcing]. 
+
+#+CAPTION: ABC Data
+#+ATTR_LATEX: :center t :environment tabularx :width \linewidth
+| origin |      1 |       2 |       3 |       4 |      5 |      6 |       7 |
+|--------+--------+---------+---------+---------+--------+--------+---------|
+|   1977 | 153638 |  342050 |  476584 |  564040 | 624388 | 666792 |  698030 |
+|   1978 | 178536 |  404948 |  563842 |  668528 | 739976 | 787966 |  823542 |
+|   1979 | 210172 |  469340 |  657728 |  780802 | 864182 | 920268 |  958764 |
+|   1980 | 211448 |  464930 |  648300 |  779340 | 858334 | 918566 |  964134 |
+|   1981 | 219810 |  486114 |  680764 |  800862 | 888444 | 951194 | 1002194 |
+|   1982 | 205654 |  458400 |  635906 |  765428 | 862214 | 944614 |      NA |
+|   1983 | 197716 |  453124 |  647772 |  790100 | 895700 |     NA |      NA |
+|   1984 | 239784 |  569026 |  833828 | 1024228 |     NA |     NA |      NA |
+|   1985 | 326304 |  798048 | 1173448 |      NA |     NA |     NA |      NA |
+|   1986 | 420778 | 1011178 |      NA |      NA |     NA |     NA |      NA |
+|   1987 | 496200 |      NA |      NA |      NA |     NA |     NA |      NA |
+
+#+CAPTION: Table 1 (contd)
+| origin | 8       | 9       | 10     | 11     |
+|--------+---------+---------+--------+--------|
+|   1977 | 719282  | 735904  | 750344 | 762544 |
+|   1978 | 848360  | 871022  | 889022 | NA     |
+|   1979 | 992532  | 1019932 | NA     | NA     |
+|   1980 | 1002134 | NA      | NA     | NA     |
+|   1981 | NA      | NA      | NA     | NA     |
+|   1982 | NA      | NA      | NA     | NA     |
+|   1983 | NA      | NA      | NA     | NA     |
+|   1984 | NA      | NA      | NA     | NA     |
+|   1985 | NA      | NA      | NA     | NA     |
+|   1986 | NA      | NA      | NA     | NA     |
+|   1987 | NA      | NA      | NA     | NA     |
+
+\hfill \newline
+
+Or, visually (Figure 1).
+
+#+DOWNLOADED: screenshot @ 2025-11-14 16:12:31
+#+CAPTION: Claims developments over time
+[[file:Dataset/2025-11-14_16-12-31_screenshot.png]]
+
+For the Mack Model, and any claims triangle modelling in general, the base assumption is that there exists some vector of variables relating historic claims to future:
+
+\[f_i = \frac{\sum^T_i C_{i, j+1}}{\sum^T_i C_{i,j} }  \]
+
+Where $C_{i,j}$ can be depicted according to Table 3.
+
+#+CAPTION: Generalised Claims Triangle
+| Year | 1 year claims | 2 year claims | 3 year claims | 4 year claims |
+|------+---------------+---------------+---------------+---------------|
+| 2000 | C_{1,1}       | C_{1,2}       | C_{1,3}       | C_{1,4}       |
+| 2001 | C_{2,1}       | C_{2,2}       | C_{2,3}       |               |
+| 2002 | C_{2,1}       | C_{3,2}       |               |               |
+| 2003 | C_{4,1}       |               |               |               |
+
+
+#+NAME: a2a calc
+#+CAPTION: Age-to-age factor calculator
+#+BEGIN_SRC R :exports code 
+  Age2AgeCalculator <- function(data = ABC) {
+      size <- dim(data)
+      len <- size[1] - 1
+      a2a <- sapply(1:len,
+                function(i){
+                    sum(data[c(1:(size[1] - i)), i+1])
+                    /sum(data[c(1:(size[1] - i)),i])
+                }) # regressing for vector
+      return(a2a)
+  }
+  devRat <- Age2AgeCalculator() # vector of development ratios
+#+END_SRC
+
+\hfill \newline
+
+If we now log our development ratios, and regress it on time, we can extract our critical hypothesised constants linking past to future claims values. We can visualise these using ggplot2 (Figure 3). Looking at the Age-to-Age effects, it's possible a mildly curved model would be a better fit than a linear regression, but the points are roughly well fitted over the time period.
+
+
+#+DOWNLOADED: screenshot @ 2025-11-14 20:30:54
+#+CAPTION: Estimated Age to Age effects
+[[file:Dataset/2025-11-14_20-30-54_screenshot.png]]
+
+
+More importantly, we can now use these cumulative effects to project future claims for each oncoming year. We can again use ggplot2 to graph these out over the future (Figure 4).
+
+#+DOWNLOADED: screenshot @ 2025-11-14 20:28:34
+#+CAPTION: Projected Claims
+[[file:Dataset/2025-11-14_20-28-34_screenshot.png]]
+
+We can also display this as a claims table, where the upper triangle is past claims, and the lower is projected claims (Tables 4 & 5). With this, we see that our total expected unpaid losses are £5,563,411.78. But we can push these models further.
+
+#+CAPTION: Full Rank Claims Dataset
+| Year |  1|       2|       3|       4|       5|       6|       7|
+|---+--+--+--+--+--+--+--|    
+|1977| 153638|  342050|  476584|  564040|  624388|  666792|  698030| 
+|1978| 178536|  404948|  563842|  668528|  739976|  787966|  823542|  
+|1979| 210172|  469340|  657728|  780802|  864182|  920268|  958764|  
+|1980| 211448|  464930|  648300|  779340|  858334|  918566|  964134| 
+|1981| 219810|  486114|  680764|  800862|  888444|  951194| 1002194| 
+|1982| 205654|  458400|  635906|  765428|  862214|  944614|  989539| 
+|1983| 197716|  453124|  647772|  790100|  895700|  960849| 1006547| 
+|1984| 239784|  569026|  833828| 1024228| 1140421| 1223371| 1281553| 
+|1985| 326304|  798048| 1173448| 1408060| 1567797| 1681832| 1761818| 
+|1986| 420778| 1011178| 1436983| 1724284| 1919895| 2059540| 2157490| 
+|1987| 496200| 1145527| 1627905| 1953379| 2174979| 2333178| 2444141| 
+
+#+CAPTION: Full Rank Claims Dataset (contd)
+|Year| 8|       9|      10|      11|   Total|
+|--+--+--+--+--+--|
+|1987| 719282|  735904|  750344|  762544|  776598|
+|1978| 848360|  871022|  889022|  903477|  920128|
+|1979| 992532| 1019932| 1040522| 1057440| 1076929|
+|1980| 1002134| 1028236| 1048994| 1066050| 1085697|
+|1981| 1036480| 1063477| 1084946| 1102586| 1122907|
+|1982| 1023392| 1050048| 1071246| 1088663| 1108728|
+|1983| 1040981| 1068095| 1089658| 1107375| 1127784|
+|1984| 1325396| 1359918| 1387372| 1409929| 1435915|
+|1985| 1822091| 1869551| 1907292| 1938303| 1974027|
+|1986| 2231299| 2289417| 2335635| 2373610| 2417357|
+|1987| 2527757| 2593597| 2645956| 2688977| 2738536|
+
+\hfill \newline
+
+\newpage
+
+* Mack Model
+
+Mack's Model generalises claims prediction down to a more precise linear regression that is unbiased under a fairly small set of assumptions:
+1) There exist a vector of constants like the ones we found earlier,
+2) Future shifts in claims developments happen independently of past ones (claims are i.i.d.),
+3) The variance of claims in a period are directly related to claims in the past period.
+
+In practice, the Mack model is weighted linear autoregression of claims. Luckily, ChainLadder provides a fully functional Mack implementation, so we can use the package to project claims.
+
+
+
+#+DOWNLOADED: screenshot @ 2025-11-14 21:08:55
+#+CAPTION: LDFs for the Mack Model
+[[file:Mack_Model/2025-11-14_21-08-55_screenshot.png]]
+
+Looking at Figure 5, we can see that claims taper off after about 10 years, and we can very easily get full tables of projected claims over the next 10 years (Tables 6 & 7).
+
+#+CAPTION: Mack Model Claims Projections
+| Year   |      1 |       2 |       3 |       4 |       5 |         6 |         7 |
+|--+--+--+--+--+--+--+--|
+|   1977 | 153638 |  342050 |  476584 |  564040 |  624388 |  666792.0 |  698030.0 |
+|   1978 | 178536 |  404948 |  563842 |  668528 |  739976 |  787966.0 |  823542.0 |
+|   1979 | 210172 |  469340 |  657728 |  780802 |  864182 |  920268.0 |  958764.0 |
+|   1980 | 211448 |  464930 |  648300 |  779340 |  858334 |  918566.0 |  964134.0 |
+|   1981 | 219810 |  486114 |  680764 |  800862 |  888444 |  951194.0 | 1002194.0 |
+|   1982 | 205654 |  458400 |  635906 |  765428 |  862214 |  944614.0 |  989538.9 |
+|   1983 | 197716 |  453124 |  647772 |  790100 |  895700 |  960849.4 | 1006546.5 |
+|   1984 | 239784 |  569026 |  833828 | 1024228 | 1140421 | 1223370.6 | 1281553.0 |
+|   1985 | 326304 |  798048 | 1173448 | 1408060 | 1567797 | 1681831.7 | 1761818.0 |
+|   1986 | 420778 | 1011178 | 1436983 | 1724284 | 1919895 | 2059540.0 | 2157489.7 |
+|   1987 | 496200 | 1145527 | 1627905 | 1953379 | 2174979 | 2333177.7 | 2444141.5 |
+
+#+CAPTION: Mack Model Claims Projections (contd)
+| Year |       8 |       9 |      10 |        11 |
+|--+--+--+--+--|
+| 1977 |  719282 |  735904 |  750344 |  762544.0 |
+| 1978 |  848360 |  871022 |  889022 |  903476.8 |
+| 1979 |  992532 | 1019932 | 1040522 | 1057440.1 |
+| 1980 | 1002134 | 1028236 | 1048994 | 1066049.7 |
+| 1981 | 1036480 | 1063477 | 1084946 | 1102586.1 |
+| 1982 | 1023392 | 1050048 | 1071246 | 1088663.4 |
+| 1983 | 1040981 | 1068095 | 1089658 | 1107374.6 |
+| 1984 | 1325396 | 1359918 | 1387372 | 1409929.1 |
+| 1985 | 1822091 | 1869551 | 1907292 | 1938303.4 |
+| 1986 | 2231299 | 2289417 | 2335635 | 2373610.5 |
+| 1987 | 2527757 | 2593597 | 2645956 | 2688976.8 |
+
+\hfill \newline
+
+The ChainLadder package even provides easy summaries of key variables.
+
+#+CAPTION: Summary Statistics for the Mack Model
+| Variable | Value |
+|--+--|
+|Latest Actual Claims Costs: |    1.022119e+07|
+|Chain-Ladder Development (to date):|       6.594764e-01|
+|(Estimated) Ultimate Claims Loss:|  1.549895e+07|
+|Incurred but Not Reported claims (estimated): |      5.277760e+06|
+|Mack's Standard Error:| 1.522831e+05|
+|Mack's Coefficient of Variance:  |  2.885374e-02|
+
+We can very easily see that the latest actual claims have been worth just over £10 million and the Estimated ultimate claims are about £15.5 million (Table 8). Beyond this, we can also evaluate the Mack Model using the visual summary defaults provided.
+
+
+#+DOWNLOADED: screenshot @ 2025-11-14 21:25:58
+#+CAPTION: Mack Model Summary
+[[file:Mack_Model/2025-11-14_21-25-58_screenshot.png]]
+
+Looking at Figure 6, we can see a clear increasing trend in forecasting claims over time, implying that our assumptions of claims being i.i.d. distributed over the observation period are invalid. We can also see that our fitted residuals are clearly trending, implying that linear regression was an improper model. We can, in response to these facts, only weight the latest 5 years in the Mack Model regression. Rerunning with these specifications:
+
+
+#+DOWNLOADED: screenshot @ 2025-11-14 21:29:00
+#+CAPTION: Mack Model Summary (Only latest 5 years used in Estimation)
+[[file:Mack_Model/2025-11-14_21-29-00_screenshot.png]]
+
+Looking at Figure 7, this specification reduced a decent amount of residual trending, but there are still some trends in the fitted residuals that either need to be better studied or approached with alternative, more flexible models.
+
+\newpage
+
+* References
+#+print_bibliography: 

@@ -8,13 +8,12 @@ install.packages("tinytex")
 library(tidyverse)
 library(ChainLadder)
 library(here)
-library(tinytex)
 
 ## ChainLadder comes with several datasets included, most already in claim triangle form
 data(ABC)
 ABC
 
-plot(RAA/1000,  main = "Claims development by origin year", lattice = TRUE)
+plot(ABC/1000,  main = "Claims development by origin year", xlab = "Development period", lattice = TRUE)
 
 ## plot makes it questionable whether there is a consistent set of weights
 ## that make variance constant between observations, as is required for
@@ -57,7 +56,7 @@ LogLinearExtrapolation <- function(data = ABC) {
     colnames(df) <- c("Development Ratios from Age to Age Calculator", "Development Years")
     df
 
-    plt <- ggplot(data = df, aes(x = `Years from Start`, y = `Development Ratios from Age to Age Calculator`))
+    plt <- ggplot(data = df, aes(x = `Development Years`, y = `Development Ratios from Age to Age Calculator`))
     plt <- plt + geom_point() + geom_smooth(method = "lm", se = FALSE)
     plt <- plt + labs(title = "Log-Linear extrapolation of Age-to-Age effects")
     plt
@@ -128,7 +127,7 @@ sprintf("The total expected unpaid losses are %4.2f", UnpaidLosses)
 mackmodel <- MackChainLadder(ABC, est.sigma = "Mack") # ChainLadder handles the Mack model on its own
 
 mackmodel$f # loss development factors (taper off after 10 years here)
-
+plot(mackmodel$f, main = "Loss Development factors for Mack Model", xlab = "Years", ylab = "LDF (ratio)")
 mackmodel$FullTriangle # full triangle of projected losses for ABC
 
 summary(mackmodel) # shows us the key totals in the model, including ultimate loss

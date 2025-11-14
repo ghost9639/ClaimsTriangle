@@ -1,5 +1,7 @@
 Basic and advanced claims triangle modelling.
 
+A full report from the project is available in ClaimsTriangle.pdf: [ClaimsTriangle.pdf](ClaimsTriangle.pdf)
+
 METHODOLOGY
 
     Compile claims data in a development triangle
